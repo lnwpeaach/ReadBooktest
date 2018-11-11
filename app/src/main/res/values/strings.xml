@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">test</string>
+    <string name="load">Load</string>
+    <string name="ocr">OCR</string>
+    <string name="area_text">Area Text</string>
+    <string name="speak">Speak</string>
+    <string name="todo">TODO</string>
+
+    <string name="speak1">1</string>
+    <string name="speak2">2</string>
+    <string name="speak3">3</string>
+    <string name="speak4">4</string>
+    <string name="speak5">5</string>
+</resources>
