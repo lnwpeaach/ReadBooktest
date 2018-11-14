@@ -18,6 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.graphics.BitmapFactory;
 import android.speech.tts.TextToSpeech;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.Locale;
 
 import com.googlecode.tesseract.android.TessBaseAPI;
@@ -44,7 +48,14 @@ public class MainActivity extends AppCompatActivity {
     Bitmap image;
     TextView textView;
     int selimg;
+    int savestate = 0;
+    int selbtn = 0;
     private static final String FILEapp = "onapp.txt";
+    private static final String FILE1 = "file1.txt";
+    private static final String FILE2 = "file2.txt";
+    private static final String FILE3 = "file3.txt";
+    private static final String FILE4 = "file4.txt";
+    private static final String FILE5 = "file5.txt";
     private TessBaseAPI mTess;
     private String selectedImagePath;
     private static final int PICK_IMAGE=100;
@@ -94,8 +105,14 @@ public class MainActivity extends AppCompatActivity {
                 //startOCR(imageUri);
                 textView.setText("Processing...");
                 textView.setText(processImage(imageView));
-                //textView.append(processImage(imageView2));
+                textView.append(processImage(imageView2));
                 //saveapp();
+                if(!t1.isSpeaking()) {
+                    String toSpeak = "กรุณาเลือกปุ่มที่ต้องการบันทึก";
+                    Toast.makeText(getApplicationContext(), toSpeak, Toast.LENGTH_SHORT).show();
+                    t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+                }
+                savestate = 1;
             }
         });
 
@@ -112,6 +129,71 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 selimg = 2;
                 opengally();
+            }
+        });
+
+        btn1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selbtn = 1;
+                if(savestate == 1 || savestate == 2) {
+                    save(FILE1);
+                }
+                else {
+                    load(FILE1);
+                }
+            }
+        });
+
+        btn2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selbtn = 2;
+                if(savestate == 1 || savestate == 2) {
+                    save(FILE2);
+                }
+                else {
+                    load(FILE2);
+                }
+            }
+        });
+
+        btn3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selbtn = 3;
+                if(savestate == 1 || savestate == 2) {
+                    save(FILE3);
+                }
+                else {
+                    load(FILE3);
+                }
+            }
+        });
+
+        btn4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selbtn = 4;
+                if(savestate == 1 || savestate == 2) {
+                    save(FILE4);
+                }
+                else {
+                    load(FILE4);
+                }
+            }
+        });
+
+        btn5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selbtn = 5;
+                if(savestate == 1 || savestate == 2) {
+                    save(FILE5);
+                }
+                else {
+                    load(FILE5);
+                }
             }
         });
 /*
@@ -262,6 +344,88 @@ public class MainActivity extends AppCompatActivity {
             if (fos != null) {
                 try {
                     fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void save(String file) {
+        load(file);
+
+        if(savestate == 1 || savestate == 3) {
+            String text = textView.getText().toString();
+            FileOutputStream fos = null;
+
+            try {
+                fos = openFileOutput(file, MODE_PRIVATE);
+                fos.write(text.getBytes());
+
+                Toast.makeText(this, "Saved to " + getFilesDir() + "/" + file,
+                        Toast.LENGTH_LONG).show();
+                savestate = 0;
+                String toSpeak = "บันทึกเสร็จสิ้น";
+                t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    public void load(String file) {
+        Toast.makeText(getApplicationContext(),"Selimg : "+selbtn,Toast.LENGTH_SHORT);
+        FileInputStream fis = null;
+
+        try {
+            fis = openFileInput(file);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            StringBuilder sb = new StringBuilder();
+            String text;
+
+            int currentbtn = selbtn;
+            if(savestate == 1) {
+                String toSpeak = "พบไฟล์ที่บันทึกไว้แล้ว " + br.readLine() + "ต้องการบันทึกทับไฟล์เดิมหรือไม่";
+                t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+                savestate = 2;
+            }
+            else if(savestate == 2) {
+                if(currentbtn == selbtn) {
+                    savestate = 3;
+                }
+                else {
+                    savestate = 0;
+                }
+            }
+            else if(savestate == 0) {
+                while ((text = br.readLine()) != null) {
+                    sb.append(text).append("\n");
+                }
+                textView.setText(sb.toString());
+                String toSpeak = textView.getText().toString();
+                t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            String toSpeak = "ไม่พบไฟล์ที่บันทึก";
+            t1.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
