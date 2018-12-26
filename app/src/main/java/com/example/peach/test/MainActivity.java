@@ -1,11 +1,16 @@
 package com.example.peach.test;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -95,7 +100,19 @@ public class MainActivity extends AppCompatActivity {
                 //intent.setType("image/*");
                 //intent.setAction(Intent.ACTION_GET_CONTENT);//
                 //startActivityForResult(Intent.createChooser(intent, "Select Picture"),SELECT_IMAGE);
-                opengally();
+                //opengally();
+
+                /*if(isOnline()) {
+                    textView.setText("Online");
+                }
+                else {
+                    textView.setText("Offline");
+                }*/
+
+                WifiManager wifiMgr = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                WifiInfo wifiInfo = wifiMgr.getConnectionInfo();
+                String name = wifiInfo.getSSID();
+                textView.setText(name);
             }
         });
         btnOcr.setOnClickListener(new View.OnClickListener() {
@@ -536,6 +553,15 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             Log.e(TAG, "Unable to copy files to tessdata " + e.toString());
         }
+    }
+
+    public boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            return true;
+        }
+        return false;
     }
 
 }
